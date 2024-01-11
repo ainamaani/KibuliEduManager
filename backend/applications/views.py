@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
@@ -61,4 +61,28 @@ class ApplicationList(APIView):
         applications = Application.objects.all()
         serializer = ApplicationSerializer(applications, many=True)
         return Response(serializer.data)
+    
+    def delete(self, request, pk):
+        application = get_object_or_404(Application, pk=pk)
+        application.delete()
+        return Response({ 'message':'Application deleted successfully' })
+    
+    def put(self, request, pk):
+        application_to_update = get_object_or_404(Application, pk=pk)
+        serializer = ApplicationSerializer(application_to_update,data=request.data,partial=True)
 
+        if serializer.is_valid():
+            # custom validation before saving
+            if self.custom_validation(serializer.validated_data):
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response({ 'error': 'Custom validation failed' }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ApplicationDetail(APIView):
+    def get(self,request,pk):
+        application = get_object_or_404(Application, pk=pk)
+        serializer = ApplicationSerializer(application)
+        return Response(serializer.data)
