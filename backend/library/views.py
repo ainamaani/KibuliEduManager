@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from . serializers import BookSerializer
-from . models import Book
+from . serializers import TakenBookSerializer
+from . models import Book, TakenBook
 from datetime import datetime, date
 from rest_framework import status
 from rest_framework.views import APIView
@@ -71,3 +72,37 @@ class BookDetail(APIView):
         book = get_object_or_404(Book, pk=pk)
         serializer = BookSerializer(book)
         return Response(serializer.data)
+    
+
+class TakenBookList(APIView):
+    def get(self, request):
+        takenbooks = TakenBook.objects.all()
+        serializer = TakenBookSerializer(takenbooks, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        serializer = TakenBookSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
+        
+def handle_book_return(self, request, pk):
+    taken_book = get_object_or_404(TakenBook, pk=pk)
+    # update the status of the taken book when returned
+    taken_book.status = 'returned'
+    # record the return date of the book
+    taken_book.book_taken = datetime.now()
+    # save the modified object back into the database
+    taken_book.save()
+    # update the available copies of the book
+    book_id = taken_book.book_taken
+    book = get_object_or_404(Book, pk=book_id)
+    book.number_of_copies += 1
+    # save the modified book object
+    book.save()
+
+    return Response({'message': 'Taken book returned successfully'})
+
+    

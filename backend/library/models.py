@@ -1,4 +1,5 @@
 from django.db import models
+from students.models import Student
 
 # Create your models here.
 
@@ -23,3 +24,21 @@ class Book(models.Model):
     class Meta:
         verbose_name = 'Book'
         verbose_name_plural = 'Books'
+
+
+class TakenBook(models.Model):
+    book_taken = models.ForeignKey(Book, on_delete=models.CASCADE)
+    student_with_book = models.ForeignKey(Student, on_delete=models.DO_NOTHING)
+    date_taken = models.DateTimeField(auto_now_add=True)
+    date_returned = models.DateTimeField(blank=True, null=True)
+
+    # status choices
+    status_choices = [('taken','Taken'),('returned','Returned')]
+    status = models.CharField(max_length=20, choices=status_choices, default='taken')
+
+    def __str__(self) -> str:
+        return self.book_taken
+    
+    class Meta:
+        verbose_name = 'Taken Book'
+        verbose_name_plural = 'Taken Books'
