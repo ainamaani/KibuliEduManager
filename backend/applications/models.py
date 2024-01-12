@@ -31,6 +31,16 @@ class Application(models.Model):
     guardian_email = models.EmailField(blank=True, null=True)
     relationship_with_guardian = models.CharField(max_length=20)
 
+    # religion choices
+    religion_choices = [('islam','ISLAM'),('christianity','CHRISTIANITY')]
+    religion = models.CharField(max_length=20, choices=religion_choices)
+
+    combination_applied_for = models.CharField(max_length=20,null=True,blank=True)
+    disabled = models.BooleanField()
+    disabled_description = models.TextField(null=True, blank=True)
+    any_chronic_disease_condition = models.BooleanField()
+    chronic_disease_condition_description = models.TextField(null=True, blank=True)
+
     # Application Status
     application_status_choices = [('pending', 'Pending'), ('accepted', 'Accepted'), ('rejected', 'Rejected')]
     application_status = models.CharField(max_length=30, choices=application_status_choices, blank=True, default='pending')

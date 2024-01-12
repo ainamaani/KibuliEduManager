@@ -1,11 +1,14 @@
 from django.shortcuts import render,get_object_or_404
+from itertools import cycle
+import random
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework import status
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from . models import Application
 from . serializers import ApplicationSerializer
+from students.models import Student
 
 # Create your views here.
 class ApplicationList(APIView):
@@ -86,3 +89,56 @@ class ApplicationDetail(APIView):
         application = get_object_or_404(Application, pk=pk)
         serializer = ApplicationSerializer(application)
         return Response(serializer.data)
+
+
+# function to accept the application
+def accept_application(self,request,pk):
+    application_to_accept = get_object_or_404(Application, pk=pk)
+    application_to_accept.application_status = 'accepted'
+    # save the modified object
+    application_to_accept.save()
+
+    # create new student after acceptance of the application
+
+    # list of houses
+    houses = ['africa','agarkhan','kakungulu','luwangula']
+    # get number of already created students
+    num_students = Student.objects.count()
+    # determine the index of the house to be allocated based on the number
+    house_index = num_students % len(houses)
+
+    # allocation of clubs
+    clubs = cycle(['interact','rotery','aids','nkobazambogo','kmsa'])
+    # use the next function to get the next club in the cycle
+    club_to_assign = next(clubs)
+
+    # handle the student number allocation for the newly created student
+    # get current year
+    current_year = datetime.now().year % 100
+    std_number = f"{current_year:02d}-{num_students + 1:03d}"
+
+
+    # handle the allocation of streams
+    if application_to_accept.class_applied_for in ['F1','F2','F3','F4']:
+        streams = ['F1','F2','F3','F4']
+        # Shuffle the list of streams to randomize the allocation
+        random.shuffle(streams)
+        # Use the next function to get the next stream in the shuffled list
+        assigned_stream = next(iter(streams))
+    
+
+    new_student = Student.objects.create(
+        first_name=application_to_accept.first_name,last_name=application_to_accept.last_name,
+        email=application_to_accept.email,phone_number=application_to_accept.phone_number,
+        profile_pic=application_to_accept.passport_photo,guardian=application_to_accept.guardian_name,
+        guardian_email=application_to_accept.guardian_email,guardian_phone_number=application_to_accept.guardian_phone_number,
+        relationship_with_guardian=application_to_accept.relationship_with_guardian,
+        current_class=application_to_accept.class_applied_for, religion=application_to_accept.religion,
+        gender=application_to_accept.gender,date_of_birth=application_to_accept.date_of_birth,
+        date_joined=datetime.now(),combination=application_to_accept.combination_applied_for,
+        disabled=application_to_accept.disabled,disabled_description=application_to_accept.disabled_description,
+        any_chronic_disease_condition=application_to_accept.any_chronic_disease_condition,
+        chronic_disease_condition_description=application_to_accept.chronic_disease_condition_description,
+        house=houses[house_index],club=club_to_assign,student_number=std_number,stream=assigned_stream
+    )
+    new_student.save()

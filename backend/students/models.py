@@ -10,6 +10,7 @@ class Student(models.Model):
     guardian = models.CharField(max_length=50)
     guardian_email = models.EmailField()
     guardian_phone_number = models.CharField(max_length=14)
+    relationship_with_guardian = models.CharField(max_length=20)
     # house choices
     house_choices = [('africa','AFRICA'),('agarkhan','AGARKHAN'),('kakunguru','KAKUNGURU'),
                      ('luwangula','LUWANGULA')]
@@ -17,7 +18,7 @@ class Student(models.Model):
 
     # club choices
     club_choices = [('interact','INTERACT'),('aids','AIDS'),('rotery','ROTERY'),
-                    ('nkobazambogo','NKOBAZAMBOGO')]
+                    ('nkobazambogo','NKOBAZAMBOGO'),('kmsa','KMSA')]
     club = models.CharField(max_length=20, choices=club_choices)
 
     # current class choices
@@ -43,11 +44,14 @@ class Student(models.Model):
     date_joined = models.DateField()
     date_left = models.DateField(null=True,blank=True)
 
-    combination = models.CharField(max_length=20)
+    combination = models.CharField(max_length=20, null=True, blank=True)
     disabled = models.BooleanField()
-    disabled_description = models.TextField()
+    disabled_description = models.TextField(null=True, blank=True)
     any_chronic_disease_condition = models.BooleanField()
-    chronic_disease_condition_description = models.TextField()
+    chronic_disease_condition_description = models.TextField(null=True, blank=True)
+
+    status_choices = [('active','ACTIVE'),('inactive','INACTIVE')]
+    status = models.CharField(max_length=20, choices=status_choices, default='inactive')
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"

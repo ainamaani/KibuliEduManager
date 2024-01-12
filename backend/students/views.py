@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
+from datetime import date,datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
@@ -83,3 +84,21 @@ class StudentDetail(APIView):
         student = get_object_or_404(Student, pk=pk)
         serializer = StudentSerializer(student)
         return Response(serializer.data)
+    
+
+def change_student_status(self, request, student_number):
+    student_to_change_status = Student.objects.get(student_number=student_number)
+    if student_to_change_status.status == 'activate':
+        student_to_change_status.status == 'inactive'
+    else:
+        student_to_change_status == 'active'
+
+    student_to_change_status.save()
+
+
+def handle_student_leaving(self, request, student_number):
+    student_left = Student.objects.get(student_number=student_number)
+    student_left.status = 'inactive'
+    student_left.date_left = datetime.now()
+    student_left.save()
+
