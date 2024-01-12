@@ -6,7 +6,7 @@ class Student(models.Model):
     last_name = models.CharField(max_length=30)
     email = models.EmailField()
     phone_number = models.CharField(max_length=14)
-    profile_pic = models.FileField(upload_to='profile_pic/')
+    profile_pic = models.ImageField(upload_to='profile_pic/')
     guardian = models.CharField(max_length=50)
     guardian_email = models.EmailField()
     guardian_phone_number = models.CharField(max_length=14)

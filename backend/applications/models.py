@@ -22,7 +22,7 @@ class Application(models.Model):
 
     # Documents
     recommendation_letter = models.FileField(upload_to='recommendation_letters/', null=True, blank=True)
-    passport_photo = models.FileField(upload_to='passport_photos/')
+    passport_photo = models.ImageField(upload_to='passport_photos/')
     results_document = models.FileField(upload_to='results_documents/')
 
     # Guardian Information
