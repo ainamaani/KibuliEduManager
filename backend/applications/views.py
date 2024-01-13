@@ -1,3 +1,7 @@
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+
 from django.shortcuts import render,get_object_or_404
 from itertools import cycle
 import random
@@ -142,3 +146,19 @@ def accept_application(self,request,pk):
         house=houses[house_index],club=club_to_assign,student_number=std_number,stream=assigned_stream
     )
     new_student.save()
+
+
+    # Send email to the applicant after accepting the application
+    subject = 'Application Accepted'
+    message = render_to_string('email_templates/application_accepted_email.html', {
+        'applicant_name': application_to_accept.first_name,
+        'student_number': new_student.student_number,
+        'house': new_student.house,
+        'club': new_student.club
+        # You can add more variables here based on your email template
+    })
+    plain_message = strip_tags(message)  # Strip HTML tags for the plain text version
+    from_email = 'aina.isaac2002@gmail.com'  
+    to_email = application_to_accept.email
+
+    send_mail(subject, plain_message, from_email, [to_email], html_message=message)

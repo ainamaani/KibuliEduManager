@@ -122,6 +122,24 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# Use SMTP as the Email backend
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
+
+# Gmail SMTP server settings
+EMAIL_HOST= os.getenv('EMAIL_HOST')
+EMAIL_PORT= os.getenv('EMAIL_PORT')
+# Use TLS for secure communication
+EMAIL_USE_TLS= os.getenv('EMAIL_USE_TLS') 
+
+
+EMAIL_HOST_USER= os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD= os.getenv('EMAIL_HOST_PASSWORD')
+
+# Default 'From' address for emails sent by your application
+DEFAULT_FROM_EMAIL= os.getenv('DEFAULT_FROM_EMAIL')
+SERVER_EMAIL= os.getenv('SERVER_EMAIL')
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
