@@ -10,6 +10,7 @@ class Result(models.Model):
     # term choices
     term_choices = [('1','1'),('2','2'),('3','3')]
     term = models.CharField(max_length=20, choices=term_choices)
+    paper_number = models.PositiveSmallIntegerField()
     uploaded_by = models.ForeignKey(Teacher, on_delete=models.DO_NOTHING)
     mark = models.PositiveSmallIntegerField(validators=[MaxValueValidator(limit_value=100)])
     # grade choices
