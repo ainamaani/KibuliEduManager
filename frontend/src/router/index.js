@@ -1,15 +1,23 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import ApplicationView from '../views/ApplicationView.vue'
+import ApplicationFormView from '../views/ApplicationFormView.vue'
+import ApplicationsView from '../views/ApplicationsView.vue'
+
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/apply',
+    name: 'ApplicationFormView',
+    component: ApplicationFormView
+  },
+  {
+    path: '/applications',
     name: 'ApplicationView',
-    component: ApplicationView
-  }
+    component: ApplicationsView
+  },
+  
 ]
 
 const router = new VueRouter({
