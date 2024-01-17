@@ -32,7 +32,7 @@ class Application(models.Model):
     relationship_with_guardian = models.CharField(max_length=20)
 
     # religion choices
-    religion_choices = [('islam','ISLAM'),('christianity','CHRISTIANITY')]
+    religion_choices = [('Islam','Islam'),('Christianity','Christianity')]
     religion = models.CharField(max_length=20, choices=religion_choices)
 
     combination_applied_for = models.CharField(max_length=20,null=True,blank=True)

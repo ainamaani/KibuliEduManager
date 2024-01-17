@@ -13,21 +13,21 @@
         <v-text-field label="Date of birth" v-model="date_of_birth" type="date" ></v-text-field>
         <v-text-field label="Phone number" v-model="phone_number"></v-text-field>
         <v-text-field label="Address" v-model="address"></v-text-field>
-        <v-select :items="classes" label="Which class are you currently in?" ></v-select>
+        <v-select :items="classes" label="Which class are you currently in?" v-model="current_class" ></v-select>
         <v-text-field label="What is your current school" v-model="school"></v-text-field>
         <v-text-field label="What is your current school location" v-model="school_location"></v-text-field>
         <v-text-field label="What is your current school contact" v-model="school_phone_number"></v-text-field>
         <v-textarea label="What is your reason for changing schools" v-model="change_reason"></v-textarea>
-        <v-select :items="classes_to_apply_for" label="Which class are you applying for?"></v-select>
+        <v-select :items="classes_to_apply_for" label="Which class are you applying for?" v-model="class_applied_for"></v-select>
         <v-text-field label="What combination are you interested in doing?" v-model="combination_applied_for"></v-text-field>
-        <v-text-field type="file" label="Upload your recommendation letter" v-model="recommendation_letter"></v-text-field>
-        <v-text-field type="file" label="Upload your passport sized photo" v-model="passport"></v-text-field>
-        <v-text-field type="file" label="Upload a pdf of results from your former school" v-model="results_document"></v-text-field>
+        <input type="file" @change="handleFileChange($event, 'recommendation_letter')" />
+        <input type="file" @change="handleFileChange($event, 'passport')" />
+        <input type="file" @change="handleFileChange($event, 'results_document')" />
         <v-text-field label="Guardian name" v-model="guardian_name"></v-text-field>
         <v-text-field label="Guardian E-mail" v-model="guardian_email"></v-text-field>
         <v-text-field label="Guardian contact/phone number" v-model="guardian_phone_number"></v-text-field>
         <v-text-field label="What is your relationship with the above guardian" v-model="relationship_with_guardian"></v-text-field>
-        <v-select label="What is your religion?" :items="religions"></v-select>
+        <v-select label="What is your religion?" :items="religions" v-model="religion"></v-select>
         <v-radio-group v-model="disabled" label="Are you disabled in any way?" >
           <v-radio label="No" value="false"></v-radio>
           <v-radio label="Yes" value="true"></v-radio>
@@ -85,41 +85,38 @@ export default {
     },
     methods:{
       handleApplicationSubmission (){
-        console.log(
-          this.first_name,  this.last_name,  this.gender,
-          this.email, this.date_of_birth, this.phone_number,
-           this.address, this.current_class, this.school
-          , this.school_location, this.school_phone_number,
-           this.change_reason, this.class_applied_for,
-           this.recommendation_letter, this.passport,
-           this.results_document, this.guardian_name,
-          this.guardian_email, this.guardian_phone_number,
-           this.relationship_with_guardian, this.religion,
-           this.combination_applied_for, this.disabled,
-           this.disabled_description, this.any_chronic_disease_condition,
-           this.chronic_disease_condition_description
-        )
-        const applicationData = { 
-          first_name: this.first_name, last_name: this.last_name, gender: this.gender,
-          email: this.email,date_of_birth: this.date_of_birth,phone_number: this.phone_number,
-          address: this.address,current_class: this.current_class,school: this.school
-          ,school_location: this.school_location,school_phone_number: this.school_phone_number,
-          change_reason: this.change_reason,class_applied_for: this.class_applied_for,
-          recommendation_letter: this.recommendation_letter,passport: this.passport,
-          results_document: this.results_document,guardian_name: this.guardian_name,
-          guardian_email: this.guardian_email,guardian_phone_number: this.guardian_phone_number,
-          relationship_with_guardian: this.relationship_with_guardian,religion: this.religion,
-          combination_applied_for: this.combination_applied_for,disabled: this.disabled,
-          disabled_description: this.disabled_description,any_chronic_disease_condition: this.any_chronic_disease_condition,
-          chronic_disease_condition_description: this.chronic_disease_condition_description
-          
-        }
-        fetch('http://localhost/api/applications/apply',{
+        const applicationData = new FormData();
+        applicationData.append('first_name', this.first_name)
+        applicationData.append('last_name', this.last_name)
+        applicationData.append('gender', this.gender)
+        applicationData.append('email', this.email)
+        applicationData.append('date_of_birth', this.date_of_birth)
+        applicationData.append('phone_number', this.phone_number)
+        applicationData.append('address', this.address)
+        applicationData.append('current_class', this.current_class)
+        applicationData.append('school', this.school)
+        applicationData.append('school_location', this.school_location)
+        applicationData.append('school_phone_number', this.school_phone_number)
+        applicationData.append('change_reason', this.change_reason)
+        applicationData.append('class_applied_for', this.class_applied_for)
+        applicationData.append('recommendation_letter', this.recommendation_letter)
+        applicationData.append('passport_photo', this.passport)
+        applicationData.append('results_document', this.results_document)
+        applicationData.append('guardian_name', this.guardian_name)
+        applicationData.append('guardian_email', this.guardian_email)
+        applicationData.append('guardian_phone_number', this.guardian_phone_number)
+        applicationData.append('relationship_with_guardian', this.relationship_with_guardian)
+        applicationData.append('religion', this.religion)
+        applicationData.append('combination_applied_for', this.combination_applied_for)
+        applicationData.append('disabled', this.disabled)
+        applicationData.append('disabled_description', this.disabled_description)
+        applicationData.append('any_chronic_disease_condition', this.any_chronic_disease_condition)
+        applicationData.append('chronic_disease_condition_description', this.chronic_disease_condition_description)
+        
+        fetch('http://localhost:8000/api/applications/apply/',{
           method: 'POST',
-          headers:{
-            'Content-Type':'application/json'
-          },
-          body: JSON.stringify(applicationData)
+          
+          body: applicationData
         }).then((response)=>{
             if(response.status === 201){
               console.log("Application submitted successfully")
@@ -140,6 +137,10 @@ export default {
         }).catch((err)=>{
             console.log(err)
         })
+      },
+      handleFileChange(event, fieldName){
+        const file = event.target.files[0]
+        this[fieldName] = file;
       }
     }
 }

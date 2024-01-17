@@ -1,10 +1,13 @@
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from django.shortcuts import render,get_object_or_404
 from itertools import cycle
 import random
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
@@ -16,44 +19,29 @@ from students.models import Student
 
 # Create your views here.
 class ApplicationList(APIView):
-    def post(self, request):
+
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request , *args, **kwargs):
         serializer = ApplicationSerializer(data=request.data)
         if serializer.is_valid():
             # custom validation before saving
-            if self.custom_validation(serializer.validated_data):
+            if self.custom_validation(serializer.validated_data, request.FILES):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response({ 'error': 'Custom validation failed' }, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def custom_validation(self, validated_data):
-        #check if all required fields are provided
-        required_fields = [
-                            'first_name', 'last_name', 'date_of_birth', 'gender', 'phone_number',
-                            'address', 'current_class', 'school', 'school_location', 'school_phone_number',
-                            'change_reason', 'class_applied_for', 'passport_photo',
-                            'results_document', 'guardian_name', 'guardian_phone_number', 'relationship_with_guardian'
-                           ]
-        for field in required_fields:
-            if field not in validated_data:
-                raise ValidationError({ 'required':["Please fill in all the required fields"]})
-            
-        #check if the phone number is greater than 10 digits
-        if 'phone_number' in validated_data and len(validated_data['phone_number']) < 10:
-            raise ValidationError({ 'phone_number':["The phone number must be greater than 10 digits"]})
-        
-        #check if the school phone number is greater than 10 digits
-        if 'school_phone_number' in validated_data and len(validated_data['school_phone_number']) < 10:
-            raise ValidationError({ 'school_phone_number':["The school phone number must be greater than 10 digits"]})
-        
-        #check if the school phone number is greater than 10 digits
-        if 'guardian_phone_number' in validated_data and len(validated_data['guardian_phone_number']) < 10:
-            raise ValidationError({ 'guardian_phone_number':["The guardian phone number must be greater than 10 digits"]})
-        
-        #check if gender is one of the provided options
-        if 'gender' in validated_data and validated_data['gender'] not in ['male', 'female']:
-            raise ValidationError({ 'gender':["The gender must be either 'male' or 'female'"]})
+    def custom_validation(self, validated_data,files):
+
+        for field_name in ['recommendation_letter','passport_photo','results_document']:
+            if field_name in files:
+                file = files[field_name]
+                try:
+                    FileExtensionValidator(allowed_extensions=['pdf','jpeg','jpg','png','doc','docx'])(file)
+                except DjangoValidationError as e:
+                    raise ValidationError({"file": [str(e)]})
         
         # Check if date of birth is not a future date and at least 10 years in the past
         if 'date_of_birth' in validated_data:
@@ -63,11 +51,14 @@ class ApplicationList(APIView):
                 raise ValidationError({ 'date_of_birth':["The date of birth can't be a future date"]})
             elif validated_data['date_of_birth'] < age_limit_date:
                 raise ValidationError({ 'date_of_birth':["You must be at least 10 years old"] })
+            
+        return True
+            
 
     def get(self, request):
         applications = Application.objects.all()
         serializer = ApplicationSerializer(applications, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, pk):
         application = get_object_or_404(Application, pk=pk)
