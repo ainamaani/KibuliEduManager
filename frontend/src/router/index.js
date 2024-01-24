@@ -1,9 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import ApplicationFormView from '../views/ApplicationFormView.vue'
-import ApplicationsView from '../views/ApplicationsView.vue'
-import LandingView from '../views/LandingView.vue'
-import NotFoundView from '../views/NotFoundView.vue'
+import ApplicationFormView from '../views/applications/ApplicationFormView.vue'
+import ApplicationsView from '../views/applications/ApplicationsView.vue'
+import AddBookView from '../views/library/AddBookView.vue'
+import LandingView from '../views/other/LandingView.vue'
+import NotFoundView from '../views/other/NotFoundView.vue'
 
 
 Vue.use(VueRouter)
@@ -24,6 +25,16 @@ const routes = [
     name: 'ApplicationView',
     component: ApplicationsView
   },
+  {
+    path: '/addbook',
+    name: 'AddBookView',
+    component: AddBookView
+  },
+  {
+    path: '*',
+    name: 'NotFoundView',
+    component: NotFoundView
+  }
   
 ]
 

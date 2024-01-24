@@ -16,7 +16,7 @@ class Book(models.Model):
     language = models.CharField(max_length=20)
     edition = models.PositiveSmallIntegerField()
     number_of_copies = models.PositiveSmallIntegerField()
-    availability_status = models.CharField(max_length=10, choices=[('available','Available'),('borrowed','Borrowed')])
+    availability_status = models.CharField(max_length=10, choices=[('available','Available'),('borrowed','Borrowed')], default='available')
 
     def __str__(self) -> str:
         return self.title

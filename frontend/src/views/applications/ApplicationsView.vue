@@ -2,13 +2,21 @@
   <div class="applications">
     <h3>Applications list</h3>
 
+    <v-icon>mdi-delete</v-icon>
+
     <v-data-table :headers="headers" :items="applications" item-key="id">
-      <template v-slot:items="props">
-        <td>{{ props.item.first_name }}</td>
-        <td>{{ props.item.last_name }}</td>
-        <td>{{ props.item.gender }}</td>
-        <td>{{ props.item.phone_number }}</td>
-        
+      <template v-slot:body="{ items }">
+        <tbody>
+          <tr v-for="(item, index) in items" :key="index">
+            <td>{{ item.first_name }}</td>
+            <td>{{ item.last_name }}</td>
+            <td>{{ item.gender }}</td>
+            <td>{{ item.phone_number }}</td>
+            <td>
+              <v-icon>mdi-delete</v-icon>
+            </td>
+          </tr>
+        </tbody>
       </template>
     </v-data-table>
   </div>
@@ -26,7 +34,8 @@ export default {
         { text: 'Gender', value: 'gender' },
         { text: 'Phone number', value: 'phone_number' },
         { text: 'Actions', value: 'actions', sortable: false },
-      ]
+      ],
+      errors : {}
     }
   },
   methods: {
