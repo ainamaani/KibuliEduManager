@@ -12,6 +12,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework import status
+from rest_framework.renderers import JSONRenderer
+from rest_framework.decorators import api_view
 from datetime import date, timedelta, datetime
 from . models import Application
 from . serializers import ApplicationSerializer
@@ -141,7 +143,7 @@ def accept_application(self,request,pk):
 
     # Send email to the applicant after accepting the application
     subject = 'Application Accepted'
-    message = render_to_string('email_templates/application_accepted_email.html', {
+    message = render_to_string('application_accepted_email.html', {
         'applicant_name': application_to_accept.first_name,
         'student_number': new_student.student_number,
         'house': new_student.house,
@@ -153,3 +155,28 @@ def accept_application(self,request,pk):
     to_email = application_to_accept.email
 
     send_mail(subject, plain_message, from_email, [to_email], html_message=message)
+
+@api_view(['GET'])
+def reject_application(request,pk):
+    application_to_reject = get_object_or_404(Application, pk=pk)
+    # change the application status to rejected
+    application_to_reject.application_status = "rejected"
+    # save the updated object
+    application_to_reject.save()
+
+    # Send email to the applicant after accepting the application
+    subject = 'Application Rejected'
+    message = render_to_string('application_rejected_email.html',{
+        'applicant_name' : application_to_reject.first_name
+    })
+      
+    
+    plain_message = strip_tags(message)  # Strip HTML tags for the plain text version
+    from_email = 'aina.isaac2002@gmail.com'  
+    to_email = application_to_reject.email
+
+    send_mail(subject, plain_message, from_email, [to_email], html_message=message)
+
+    # Return a JSON response with the appropriate renderer
+    return Response({'message': 'Application rejected successfully'}, status=status.HTTP_200_OK)
+
